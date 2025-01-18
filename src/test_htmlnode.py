@@ -1,6 +1,8 @@
 import unittest
 
 from htmlnode import HTMLNode, LeafNode, ParentNode
+from textnode import TextNode, TextType
+from main import text_node_to_html_node
 
 class TestTextNode(unittest.TestCase):
     def test_create(self):
@@ -100,6 +102,46 @@ class TestTextNode(unittest.TestCase):
         node.children.append(leaf3)
         expected_html = "<OUTMOST href=\"youtube.com\" Breakfast=\"Waffles\"><Parent1 science=\"fishing\"><Leaf1 href=\"fakewebsite.stl\">Leaf 1 Value</Leaf1><Leaf2>Leaf 2 Value</Leaf2></Parent1><Parent2><Leaf2>Leaf 2 Value</Leaf2></Parent2><idk>sandwich</idk></OUTMOST>"
         self.assertEqual(node.to_html(), expected_html)
+
+    # Test the main.py text_node_to_html_node function
+    def test_text_to_html(self):
+        # Create the TextNodes for testing
+        text_normal = TextNode("normal", TextType.NORMAL, "This is junk, it shouldn't show up anywhere: normal")
+        text_bold = TextNode("bold", TextType.BOLD, "This is junk, it shouldn't show up anywhere: bold")
+        text_italic = TextNode("italic", TextType.ITALIC, "This is junk, it shouldn't show up anywhere: italic")
+        text_code = TextNode("code", TextType.CODE, "This is junk, it shouldn't show up anywhere: code")
+        text_link = TextNode("link", TextType.LINK, "websitelink.com: link")
+        text_image = TextNode("image", TextType.IMAGE, "websiteimage.com: image")
+        # Convert to html_nodes for testing
+        normal_html = text_node_to_html_node(text_normal)
+        bold_html = text_node_to_html_node(text_bold)
+        italic_html = text_node_to_html_node(text_italic)
+        code_html = text_node_to_html_node(text_code)
+        link_html = text_node_to_html_node(text_link)
+        image_html = text_node_to_html_node(text_image)
+        to_test = [normal_html, bold_html, italic_html, code_html, link_html, image_html]
+        # Expected values for each value of the nodes, 0 = tag, 1 = value, 2 = children, 3 = props, matches key off of the value property of an htmlnode
+        expected_values = {
+            "normal" : [None, "normal", None, None],
+            "bold" : ["b", "bold", None, None],
+            "italic" : ["i", "italic", None, None],
+            "code" : ["code", "code", None, None],
+            "link" : ["a", "link", None, {"href" : "websitelink.com: link"}],
+            "" : ["img", "", None, {"src": "websiteimage.com: image", "alt": "image"}]
+        }
+
+        for html_node in to_test:
+            expected = expected_values[html_node.value]
+            # Test the tag, value, children, and props fields
+            self.assertEqual(html_node.tag, expected[0])
+            self.assertEqual(html_node.value, expected[1])
+            self.assertEqual(html_node.children, expected[2])
+            self.assertEqual(html_node.props, expected[3])
+            # Make sure that creating a new LeafNode with the expected data doesn't give a different result
+            test_create_equal = LeafNode(expected[0], expected[1], expected[3])
+            self.assertEqual(html_node.to_html(), test_create_equal.to_html())
+
+
 
         
 
