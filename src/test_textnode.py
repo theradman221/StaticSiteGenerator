@@ -93,7 +93,22 @@ class TestTextNode(unittest.TestCase):
             index += 1
 
     def test_markdown_extractors(self):
-        text = ""
+        # Pulled these examples from boot.dev
+        text_image = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        test_link = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        images = extract_markdown_images(text_image)
+        link = extract_markdown_links(test_link)
+
+        self.assertEqual(extract_markdown_links(text_image), []) # Links shouldn't match images
+        self.assertEqual(extract_markdown_images(test_link), []) # Images shouldn't match links
+        self.assertEqual(images[0][0], "rick roll")
+        self.assertEqual(images[1][0], "obi wan")
+        self.assertEqual(link[0][0], "to boot dev")
+        self.assertEqual(link[1][0], "to youtube")
+
+        simple_link = "This is a link [who knows where it goes?](notme!) it really is weird!"
+        self.assertEqual(extract_markdown_links(simple_link), [("who knows where it goes?", "notme!")])
+
 
 
 
